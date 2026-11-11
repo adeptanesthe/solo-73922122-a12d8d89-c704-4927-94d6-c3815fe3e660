@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTTPS 证书轮换 · 防火墙规则变更核对工具</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="page-header">
+    <div class="header-row">
+      <div>
+        <h1>HTTPS 证书轮换</h1>
+        <p class="subtitle">
+          上传单张 RSA 证书 PEM、未加密 RSA 私钥及预期当前版本。全部校验通过后
+          <strong>原子启用</strong>并递增版本；版本不符或任一校验失败保留原证书。
+          两个 HTTPS 工作进程共享 SQLite 中的同一行材料快照。
+        </p>
+      </div>
+      <nav class="header-nav">
+        <a class="btn btn-header" href="/">← 返回规则核对</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div id="error-banner" class="error-banner" hidden></div>
+    <div id="success-banner" class="success-banner" hidden></div>
+
+    <section class="panel rotate-section">
+      <div class="panel-head">
+        <h2>当前活动证书</h2>
+        <span class="hint">所有信息来自 SQLite 活动版本行</span>
+      </div>
+      <div class="panel-body">
+        <div id="current-state" class="state-grid">
+          <div class="muted">加载中…</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel rotate-section">
+      <div class="panel-head">
+        <h2>校验并原子启用</h2>
+        <span class="hint">版本仅在全部校验通过后 +1</span>
+      </div>
+      <div class="panel-body">
+        <form id="rotate-form" autocomplete="off">
+          <div class="form-grid">
+            <label class="field">
+              <span>预期当前版本（必填）</span>
+              <input id="expected-version" type="number" min="1" step="1" required />
+            </label>
+            <label class="field">
+              <span>证书文件（单张 RSA 证书 PEM）</span>
+              <input id="cert-file" type="file" accept=".pem,.crt,.cer,text/plain" />
+            </label>
+            <label class="field">
+              <span>私钥文件（未加密 RSA 私钥 PEM）</span>
+              <input id="key-file" type="file" accept=".pem,.key,text/plain" />
+            </label>
+          </div>
+
+          <div class="sample-bar">
+            <span>本地轮换样例：</span>
+            <button type="button" class="btn btn-small" data-sample="sample-a">载入样例 A</button>
+            <button type="button" class="btn btn-small" data-sample="sample-b">载入样例 B</button>
+            <span id="sample-note" class="hint"></span>
+          </div>
+
+          <label class="field">
+            <span>证书 PEM 内容</span>
+            <textarea id="cert-pem" rows="7" spellcheck="false"
+              placeholder="-----BEGIN CERTIFICATE-----"></textarea>
+          </label>
+          <label class="field">
+            <span>私钥 PEM 内容</span>
+            <textarea id="key-pem" rows="9" spellcheck="false"
+              placeholder="-----BEGIN PRIVATE KEY-----"></textarea>
+          </label>
+
+          <div class="form-actions">
+            <button id="btn-activate" type="submit" class="btn btn-primary">
+              校验并原子启用（版本 +1）
+            </button>
+            <span class="hint">
+              校验项：RSA 单证书、未加密 RSA 私钥、证书/私钥匹配、DNS SAN 含 localhost、
+              当前有效、BasicConstraints CA=false。
+            </span>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="panel rotate-section">
+      <div class="panel-head">
+        <h2>双进程握手探测</h2>
+        <div>
+          <button id="btn-probe" type="button" class="btn btn-small">重新探测两个进程</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <p class="hint">
+          服务端会分别对两个 HTTPS 工作进程发起真实的 TLS 握手，并显示握手证书的
+          SHA-256 指纹（以及该进程报告的活动版本）。若某进程不可达，会在错误列说明。
+        </p>
+        <div id="probe-summary" class="probe-summary muted">尚未探测。</div>
+        <div class="table-wrap">
+          <table class="probe-table">
+            <thead>
+              <tr>
+                <th>进程</th>
+                <th>访问地址</th>
+                <th>握手证书 SHA-256</th>
+                <th>报告版本</th>
+                <th>TLS / 状态</th>
+                <th>耗时</th>
+              </tr>
+            </thead>
+            <tbody id="probe-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel rotate-section info-panel">
+      <h2>轮换语义</h2>
+      <ul>
+        <li><strong>零停机：</strong>轮换只更新 SQLite 活动行，不重启任何工作进程。</li>
+        <li><strong>新握手用新版：</strong>每个新 TCP 连接在 TLS 握手前读取单行原子快照；
+          启用成功后开始的完整握手都会使用新证书。</li>
+        <li><strong>既有连接不受影响：</strong>已建立的 TLS 连接继续用旧会话服务。</li>
+        <li><strong>禁止会话恢复：</strong>每个连接使用独立 SSLContext，并关闭 TLS
+          ticket（<code>OP_NO_TICKET</code> / <code>num_tickets=0</code>），避免复用旧会话。</li>
+        <li><strong>无混配材料：</strong>版本、证书、私钥、指纹在同一行内一次性更新/读取，
+          不会出现“新证书 + 旧私钥”。</li>
+        <li><strong>并发安全：</strong>激活使用“期望版本”比较并交换；同一预期版本的并发
+          请求只有一个成功，其余返回 409 且不修改数据。</li>
+        <li><strong>持久化：</strong>SQLite 保存在共享卷中，进程重启后继续使用同一活动证书；
+          演示证书与两套样例只在首次启动生成一次。</li>
+      </ul>
+      <p class="hint">
+        浏览器访问自签名演示证书时会提示不安全，可手动继续访问。生产环境请替换为受信任的
+        CA 签发证书，并不要在共享卷中长期保存明文私钥。
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <p>演示证书为自签名叶证书（CA=false，DNS SAN localhost），仅用于本地演示。</p>
+  </footer>
+
+  <script src="/static/rotate.js"></script>
+</body>
+</html>

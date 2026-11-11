@@ -1,14 +1,49 @@
 services:
-  firewall-checker:
+  worker1:
     build: .
-    image: firewall-rule-checker:1.0.0
-    container_name: firewall-rule-checker
+    image: firewall-rule-checker:2.0.0
+    container_name: firewall-checker-worker1
+    environment:
+      WORKER_NAME: worker1
+      CERT_DB_PATH: /data/certs.db
+      HTTPS_PORT: "8443"
+      INTERNAL_PORT: "18080"
+      PROBE_TARGETS: "worker1|https://worker1:8443|https://localhost:8443,worker2|https://worker2:8443|https://localhost:8444"
+      LOG_LEVEL: info
+    volumes:
+      - cert-data:/data
     ports:
-      - "8000:8000"
+      - "8443:8443"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4)"]
-      interval: 30s
+      test: ["CMD", "python", "-m", "app.healthcheck"]
+      interval: 15s
       timeout: 5s
-      retries: 3
-      start_period: 10s
+      retries: 5
+      start_period: 25s
+
+  worker2:
+    build: .
+    image: firewall-rule-checker:2.0.0
+    container_name: firewall-checker-worker2
+    environment:
+      WORKER_NAME: worker2
+      CERT_DB_PATH: /data/certs.db
+      HTTPS_PORT: "8443"
+      INTERNAL_PORT: "18080"
+      PROBE_TARGETS: "worker1|https://worker1:8443|https://localhost:8443,worker2|https://worker2:8443|https://localhost:8444"
+      LOG_LEVEL: info
+    volumes:
+      - cert-data:/data
+    ports:
+      - "8444:8443"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-m", "app.healthcheck"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
+
+volumes:
+  cert-data:

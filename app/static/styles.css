@@ -419,3 +419,222 @@ footer {
   font-size: 12px;
   padding: 18px;
 }
+
+/* ------------------------------------------------------------------------- */
+/* 证书轮换页与首页导航
+/* ------------------------------------------------------------------------- */
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.header-nav {
+  display: flex;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+a.btn {
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-header {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.45);
+  color: #fff;
+  white-space: nowrap;
+}
+
+.btn-header:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.success-banner {
+  background: var(--allow-bg);
+  border: 1px solid var(--allow-border);
+  color: var(--allow);
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  white-space: pre-wrap;
+  font-size: 14px;
+}
+
+.rotate-section {
+  margin-bottom: 22px;
+}
+
+.panel-body {
+  padding: 18px;
+}
+
+.state-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.state-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  background: #fbfcfe;
+  padding: 10px 12px;
+  min-width: 0;
+}
+
+.state-label {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.state-value {
+  font-size: 14px;
+  word-break: break-all;
+}
+
+.state-value.fingerprint {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.field span {
+  font-weight: 600;
+  color: #374151;
+}
+
+.field input[type="number"],
+.field input[type="file"],
+.field textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+}
+
+.field textarea {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.45;
+  resize: vertical;
+  min-height: 110px;
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: 2px solid #bfdbfe;
+  border-color: var(--primary);
+}
+
+.sample-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.probe-summary {
+  margin: 12px 0;
+  font-size: 13px;
+}
+
+.probe-table {
+  font-size: 12px;
+}
+
+.probe-table th,
+.probe-table td {
+  vertical-align: top;
+}
+
+.probe-table .url-cell {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  word-break: break-all;
+}
+
+.probe-table .fingerprint {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 11px;
+  word-break: break-all;
+  background: #f3f4f6;
+  padding: 2px 5px;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+.probe-table .version-cell {
+  font-weight: 700;
+  text-align: center;
+}
+
+.error-cell {
+  color: var(--block);
+  word-break: break-word;
+}
+
+.ok-cell {
+  color: var(--allow);
+}
+
+.info-panel {
+  padding: 18px;
+}
+
+.info-panel h2 {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+.info-panel ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.info-panel code {
+  background: #f3f4f6;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+

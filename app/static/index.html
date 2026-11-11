@@ -8,12 +8,19 @@
 </head>
 <body>
   <header class="page-header">
-    <h1>防火墙规则变更核对工具</h1>
-    <p class="subtitle">
-      录入变更单中的旧、新两份有序规则（首条命中生效，未命中默认拒绝），
-      工具按区间计算全部连接中的<strong>新增放行</strong>与<strong>新增阻断</strong>区域，
-      以互不重叠的源地址段 × 目标地址段 × 端口段完整展示，并附示例连接与两侧命中规则。
-    </p>
+    <div class="header-row">
+      <div>
+        <h1>防火墙规则变更核对工具</h1>
+        <p class="subtitle">
+          录入变更单中的旧、新两份有序规则（首条命中生效，未命中默认拒绝），
+          工具按区间计算全部连接中的<strong>新增放行</strong>与<strong>新增阻断</strong>区域，
+          以互不重叠的源地址段 × 目标地址段 × 端口段完整展示，并附示例连接与两侧命中规则。
+        </p>
+      </div>
+      <nav class="header-nav">
+        <a class="btn btn-header" href="/rotate">HTTPS 证书轮换 →</a>
+      </nav>
+    </div>
   </header>
 
   <main>
